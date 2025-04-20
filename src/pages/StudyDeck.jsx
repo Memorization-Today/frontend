@@ -1,4 +1,3 @@
-// src/pages/StudyDeck.jsx
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useDeckStore from "../store/useDeckStore";
@@ -15,6 +14,8 @@ export default function StudyDeck() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [wrongCount, setWrongCount] = useState(0);
+  const [reviewCards, setReviewCards] = useState([]);
+  const [reviewMode, setReviewMode] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
 
   useEffect(() => {
@@ -27,15 +28,28 @@ export default function StudyDeck() {
   const current = shuffledCards[currentIndex];
 
   const handleAnswer = (correct) => {
-    if (!correct) setWrongCount((prev) => prev + 1);
+    if (!correct && !reviewMode) {
+      setWrongCount((prev) => prev + 1);
+      setReviewCards((prev) => [...prev, current]);
+    }
 
     if (currentIndex + 1 < shuffledCards.length) {
       setCurrentIndex((prev) => prev + 1);
       setShowAnswer(false);
     } else {
-      setIsFinished(true);
-      updateLastStudiedAt(deckId);
-      recordReviewResult(deckId, wrongCount);
+      if (!reviewMode && reviewCards.length > 0) {
+        // 복습 카드로 전환
+        setShuffledCards(reviewCards);
+        setCurrentIndex(0);
+        setShowAnswer(false);
+        setReviewMode(true);
+        setReviewCards([]);
+      } else {
+        // 학습 종료
+        setIsFinished(true);
+        updateLastStudiedAt(deckId);
+        recordReviewResult(deckId, wrongCount); // 복습은 제외된 상태
+      }
     }
   };
 
@@ -61,6 +75,13 @@ export default function StudyDeck() {
           <div className="text-xs text-subtext mb-1">
             {currentIndex + 1} / {shuffledCards.length} 문제
           </div>
+
+          {reviewMode && (
+            <div className="text-[10px] text-white bg-gray-500 rounded-full px-2 py-0.5 inline-block mb-1">
+              복습 카드
+            </div>
+          )}
+
           <div className="text-sm text-subtext mb-1">질문</div>
           <div className="flex justify-center items-center min-h-[80px]">
             <div className="text-xl font-semibold text-text leading-snug">
