@@ -119,6 +119,9 @@ const useDeckStore = create(
 
         return { reviewCount, lastWrong, forgettingRate };
       },
+      overwriteDecks: (newDecks) => {
+        set(() => ({ decks: newDecks }));
+      },
     }),
     {
       name: "deck-storage",

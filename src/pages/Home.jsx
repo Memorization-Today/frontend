@@ -42,7 +42,8 @@ export default function Home() {
         } else {
           alert("잘못된 형식의 JSON입니다.");
         }
-      } catch {
+      } catch (e) {
+        console.error("JSON 파싱 오류:", e);
         alert("JSON 파싱에 실패했습니다.");
       }
     };
